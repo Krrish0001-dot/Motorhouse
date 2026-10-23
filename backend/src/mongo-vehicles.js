@@ -40,5 +40,22 @@ export async function createMongoVehicles(database) {
       if (!ObjectId.isValid(id)) return false
       return (await collection.deleteOne({ _id: new ObjectId(id) })).deletedCount === 1
     },
+    async purchase(id) {
+      if (!ObjectId.isValid(id)) return null
+      // The stock predicate and decrement execute in one MongoDB operation.
+      return toVehicle(await collection.findOneAndUpdate(
+        { _id: new ObjectId(id), quantity: { $gt: 0 } },
+        { $inc: { quantity: -1 } },
+        { returnDocument: 'after' },
+      ))
+    },
+    async restock(id, quantity) {
+      if (!ObjectId.isValid(id)) return null
+      return toVehicle(await collection.findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        { $inc: { quantity } },
+        { returnDocument: 'after' },
+      ))
+    },
   }
 }
