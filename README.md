@@ -1,6 +1,6 @@
 # Motorhouse — Express + MongoDB Atlas
 
-This is the **backend authentication and vehicle CRUD stage** of the Incubyte car dealership kata. Purchase/restock inventory actions and the React frontend are planned for later stages.
+This is the **backend stage** of the Incubyte car dealership kata: authentication, vehicle CRUD/search, purchase, and restock. The React frontend is planned for the next stage.
 
 ## Current REST API
 
@@ -14,10 +14,14 @@ This is the **backend authentication and vehicle CRUD stage** of the Incubyte ca
 | `POST` | `/api/vehicles` | Adds a vehicle (admin only) |
 | `PUT` | `/api/vehicles/:id` | Updates supplied fields (admin only) |
 | `DELETE` | `/api/vehicles/:id` | Deletes a vehicle (admin only) |
+| `POST` | `/api/vehicles/:id/purchase` | Decreases stock by one; returns `409` when out of stock (authenticated) |
+| `POST` | `/api/vehicles/:id/restock` | Adds a positive whole `quantity` to stock (admin only) |
 
 Passwords use bcrypt hashes. The database has a unique email index. The server assigns the admin role only when `admin_code` matches the private `ADMIN_INVITE_CODE`; a client-supplied `role` is ignored. MongoDB Atlas is the persistent production database; the tests inject a small fake user store to verify HTTP behavior without requiring Atlas credentials. Real Atlas integration is still to be checked with your cluster.
 
 Vehicles have a generated MongoDB ID, make, model, category, price, and quantity. Add a vehicle with JSON such as `{"make":"Honda","model":"Civic","category":"Sedan","price":19000.50,"quantity":2}` and an admin bearer token. Prices are stored as integer cents to avoid floating-point stock prices; the API returns numeric prices. Search text matches case-insensitive substrings and combines supplied filters. Invalid details return `422`, missing vehicles `404`, and non-admin writes `403`. The full collection is returned without pagination at this kata stage.
+
+Purchase is an atomic conditional MongoDB update that decrements only when `quantity > 0`; it returns the updated vehicle. Restock accepts JSON such as `{"quantity":3}` and atomically increments stock. Both operations return the updated quantity. No payment processing is performed in this kata.
 
 ## Local setup
 
@@ -44,8 +48,8 @@ Send that JSON to `POST /api/auth/register`. Do not expose the invite code in a 
 
 ## TDD progress
 
-The Git history contains failing tests before the authentication and vehicle CRUD implementations. Tests use Node's built-in test runner and Supertest; the Mongo search adapter also has a query test. See `TEST_REPORT.md` for results and `PROMPTS.md` for the conversation record status.
+The Git history contains failing tests before the authentication, vehicle CRUD, and inventory implementations. Tests use Node's built-in test runner and Supertest; Mongo adapter tests cover search and conditional purchase updates. See `TEST_REPORT.md` for results and `PROMPTS.md` for the conversation record status.
 
 ## My AI Usage
 
-OpenAI Codex helped draft authentication and vehicle tests, the Express and MongoDB implementation, and documentation. The tests and code were reviewed against the kata requirements. AI made the red–green cycles faster; exercise the new vehicle endpoints against your Atlas cluster after applying this update. Add a complete raw chat export or public link to `PROMPTS.md` before submission.
+OpenAI Codex helped draft authentication, vehicle, and inventory tests, the Express and MongoDB implementation, and documentation. The tests and code were reviewed against the kata requirements. AI made the red–green cycles faster; exercise purchase and restock against your Atlas cluster after applying this update. Add a complete raw chat export or public link to `PROMPTS.md` before submission.
