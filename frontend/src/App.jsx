@@ -24,7 +24,7 @@ export default function App() {
     return () => { active = false }
   }, [token])
 
-  function logout() { localStorage.removeItem('motorhouse_auth'); setSession(null); setVehicles([]) }
+  function logout() { localStorage.removeItem('motorhouse_auth'); setSession(null); setVehicles([]); setNotice('') }
 
   async function authenticate(form) {
     setBusy(true); setNotice('')
