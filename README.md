@@ -15,7 +15,7 @@ Passwords use bcrypt hashes. The database has a unique email index. The server a
 ## Local setup
 
 1. Create a MongoDB Atlas cluster, a database user, and a Network Access rule that permits your development machine. Copy its Node.js connection string.
-2. The working `backend/.env` has already been created locally with generated `JWT_SECRET` and `ADMIN_INVITE_CODE`. Open it and add your Atlas URI after `MONGODB_URI=`. Keep this file private; it is ignored by Git. If downloading the source archive elsewhere, copy `.env.example` to `.env` and create your own secrets.
+2. The working `backend/.env` is included in the private project download with generated `JWT_SECRET` and `ADMIN_INVITE_CODE`. Open it and add your Atlas URI after `MONGODB_URI=`. Keep this file private; Git ignores it. Do not publish the download as-is because it contains these secrets. The public Git repository should contain only `.env.example`.
 3. Run:
 
 ```bash
