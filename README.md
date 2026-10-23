@@ -23,6 +23,19 @@ Vehicles have a generated MongoDB ID, make, model, category, price, and quantity
 
 Purchase is an atomic conditional MongoDB update that decrements only when `quantity > 0`; it returns the updated vehicle. Restock accepts JSON such as `{"quantity":3}` and atomically increments stock. Both operations return the updated quantity. No payment processing is performed in this kata.
 
+## Backend structure (MVC)
+
+| Folder | Responsibility |
+| --- | --- |
+| `backend/src/routes/` | Declare REST paths and attach middleware/controllers |
+| `backend/src/controllers/` | Handle API behavior and HTTP responses |
+| `backend/src/models/` | Read and write MongoDB documents |
+| `backend/src/views/` | Serialize public JSON without database-only fields |
+| `backend/src/middleware/` | Authentication, admin authorization, async/error handling |
+| `backend/src/validation/` | Parse vehicle payloads and search filters |
+
+`app.js` wires the pieces together; `server.js` connects to Atlas. Since this is a JSON API, its views are response serializers rather than HTML templates. The refactor preserves the existing endpoint contract.
+
 ## Local setup
 
 1. Create a MongoDB Atlas cluster, a database user, and a Network Access rule that permits your development machine. Copy its Node.js connection string.
