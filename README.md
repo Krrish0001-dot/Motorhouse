@@ -86,7 +86,13 @@ The frontend reads `VITE_API_URL` at **build time**, so changing it requires a n
 
 ## Screenshots
 
-Final screenshots of the working inventory, admin form, and purchase confirmation will be added to `docs/screenshots/` before submission. Capture them from the final application after checking that browser tabs, credentials, and private account details are not visible.
+These screenshots were captured from the locally running app after the search field fix. They show the admin dashboard, an out-of-stock vehicle with Purchase disabled, and the member dashboard.
+
+![Admin dashboard with inventory controls](docs/screenshots/admin-dashboard.png)
+
+![Out-of-stock vehicle with Purchase disabled](docs/screenshots/out-of-stock.png)
+
+![Member dashboard](docs/screenshots/member-dashboard.png)
 
 ## TDD progress
 
