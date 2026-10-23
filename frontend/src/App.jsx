@@ -43,7 +43,8 @@ export default function App() {
       await api.purchase(vehicle.id, token)
       setVehicles(await api.vehicles(token))
       setNotice(`You purchased a ${vehicle.make} ${vehicle.model}.`)
-    } catch (error) { setNotice(error.message) }
+      return true
+    } catch (error) { setNotice(error.message); return false }
     finally { setBusyId(null) }
   }
 

@@ -3,6 +3,7 @@ import { ArrowRight, CarFront, LogOut, Plus, Search, SlidersHorizontal, Sparkles
 import VehicleArt from './VehicleArt.jsx'
 import VehicleCard from './VehicleCard.jsx'
 import AdminDialog from './AdminDialog.jsx'
+import PurchaseDialog from './PurchaseDialog.jsx'
 
 const categories = ['All vehicles', 'Sedan', 'SUV', 'Coupe', 'Hatchback', 'Truck', 'Electric']
 
@@ -13,6 +14,7 @@ export default function Inventory({ vehicles, role, onPurchase, onAdminAction, b
   const [maxPrice, setMaxPrice] = useState('')
   const [showFilters, setShowFilters] = useState(false)
   const [adminDialog, setAdminDialog] = useState(null)
+  const [purchaseVehicle, setPurchaseVehicle] = useState(null)
   const visible = useMemo(() => vehicles.filter(vehicle => {
     const text = `${vehicle.make} ${vehicle.model} ${vehicle.category}`.toLowerCase()
     return text.includes(query.trim().toLowerCase()) &&
@@ -30,9 +32,10 @@ export default function Inventory({ vehicles, role, onPurchase, onAdminAction, b
         {showFilters && <div className="flex flex-wrap items-center gap-3 mt-3 p-4 bg-white rounded-2xl border border-[#e7ebe4]"><label className="text-sm font-semibold">Min price<input type="number" min="0" className="input mt-1 w-40" value={minPrice} onChange={event => setMinPrice(event.target.value)} placeholder="Any" /></label><label className="text-sm font-semibold">Max price<input type="number" min="0" className="input mt-1 w-40" value={maxPrice} onChange={event => setMaxPrice(event.target.value)} placeholder="Any" /></label><button className="text-sm font-bold text-forest mt-5" onClick={() => { setMinPrice(''); setMaxPrice('') }}>Clear</button></div>}
         <div className="flex gap-2 mt-7 overflow-x-auto pb-2">{categories.map(item => <button key={item} onClick={() => setCategory(item)} className={`whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-bold transition ${category === item ? 'bg-forest text-white' : 'bg-white border border-[#e7ebe4] text-slate-600 hover:border-forest'}`}>{item}</button>)}</div>
         <p className="text-sm text-slate-500 mt-8 mb-5"><strong className="text-ink">{visible.length}</strong> vehicles found</p>
-        {visible.length ? <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">{visible.map((vehicle, index) => <VehicleCard key={vehicle.id} vehicle={vehicle} variant={index} onPurchase={onPurchase} onAdminSelect={(action, item) => setAdminDialog({ action, vehicle: item })} admin={role === 'admin'} busy={busy || busyId !== null} />)}</div> : <div className="bg-white rounded-3xl border border-dashed border-[#cbd6c6] py-20 text-center"><CarFront size={42} className="mx-auto text-[#9bb59a]" /><h3 className="font-display font-bold text-xl mt-5">No vehicles found</h3><p className="text-slate-500 mt-2">Try another search or category.</p></div>}
+        {visible.length ? <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">{visible.map((vehicle, index) => <VehicleCard key={vehicle.id} vehicle={vehicle} variant={index} onPurchase={setPurchaseVehicle} onAdminSelect={(action, item) => setAdminDialog({ action, vehicle: item })} admin={role === 'admin'} busy={busy || busyId !== null} />)}</div> : <div className="bg-white rounded-3xl border border-dashed border-[#cbd6c6] py-20 text-center"><CarFront size={42} className="mx-auto text-[#9bb59a]" /><h3 className="font-display font-bold text-xl mt-5">No vehicles found</h3><p className="text-slate-500 mt-2">Try another search or category.</p></div>}
       </section>
     </main><footer className="border-t border-[#e7ebe4] py-8 text-center text-sm text-slate-400">Motorhouse · Made for the journey.</footer>
     {adminDialog && <AdminDialog key={`${adminDialog.action}-${adminDialog.vehicle?.id || 'new'}`} {...adminDialog} onClose={() => setAdminDialog(null)} onSubmit={onAdminAction} busy={busy} />}
+    {purchaseVehicle && <PurchaseDialog vehicle={purchaseVehicle} onClose={() => setPurchaseVehicle(null)} onPurchase={onPurchase} />}
   </div>
 }

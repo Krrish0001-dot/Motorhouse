@@ -21,7 +21,7 @@ Passwords use bcrypt hashes. The database has a unique email index. The server a
 
 Vehicles have a generated MongoDB ID, make, model, category, price, and quantity. Add a vehicle with JSON such as `{"make":"Honda","model":"Civic","category":"Sedan","price":19000.50,"quantity":2}` and an admin bearer token. Prices are stored as integer cents to avoid floating-point stock prices; the API returns numeric prices. Search text matches case-insensitive substrings and combines supplied filters. Invalid details return `422`, missing vehicles `404`, and non-admin writes `403`. The full collection is returned without pagination at this kata stage.
 
-Purchase is an atomic conditional MongoDB update that decrements only when `quantity > 0`; it returns the updated vehicle. Restock accepts JSON such as `{"quantity":3}` and atomically increments stock. Both operations return the updated quantity. No payment processing is performed in this kata.
+Purchase is an atomic conditional MongoDB update that decrements only when `quantity > 0`; it returns the updated vehicle. The frontend asks for confirmation before sending the purchase request; Cancel leaves inventory unchanged. Restock accepts JSON such as `{"quantity":3}` and atomically increments stock. Both operations return the updated quantity. No payment processing is performed in this kata.
 
 ## Backend structure (MVC)
 
