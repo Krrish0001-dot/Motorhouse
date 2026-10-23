@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { createMongoVehicles } from '../src/mongo-vehicles.js'
+import { createMongoVehicles } from '../src/models/vehicleModel.js'
 
 test('Mongo search treats text as literal and applies price bounds in cents', async () => {
   let actualQuery

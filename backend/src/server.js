@@ -1,8 +1,8 @@
 import 'dotenv/config'
 import { MongoClient } from 'mongodb'
 import { createApp } from './app.js'
-import { createMongoUsers } from './mongo-users.js'
-import { createMongoVehicles } from './mongo-vehicles.js'
+import { createMongoUsers } from './models/userModel.js'
+import { createMongoVehicles } from './models/vehicleModel.js'
 
 const { MONGODB_URI, JWT_SECRET, ADMIN_INVITE_CODE, MONGODB_DB_NAME = 'motorhouse', FRONTEND_ORIGIN = 'http://localhost:5173' } = process.env
 if (!MONGODB_URI || !JWT_SECRET) {
