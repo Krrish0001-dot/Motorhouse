@@ -47,8 +47,22 @@ export default function App() {
     finally { setBusyId(null) }
   }
 
+  async function adminAction(action, vehicle, data) {
+    setBusy(true); setNotice('')
+    try {
+      if (action === 'add') await api.createVehicle(data, token)
+      if (action === 'edit') await api.updateVehicle(vehicle.id, data, token)
+      if (action === 'delete') await api.deleteVehicle(vehicle.id, token)
+      if (action === 'restock') await api.restockVehicle(vehicle.id, data.quantity, token)
+      setVehicles(await api.vehicles(token))
+      setNotice(action === 'delete' ? 'Vehicle deleted.' : 'Inventory updated.')
+      return true
+    } catch (error) { setNotice(error.message); return false }
+    finally { setBusy(false) }
+  }
+
   return <>
-    {session ? <Inventory vehicles={vehicles} role={session.role} onPurchase={purchase} busyId={busyId} onLogout={logout} /> : <AuthScreen mode={mode} setMode={setMode} onSubmit={authenticate} busy={busy} />}
+    {session ? <Inventory vehicles={vehicles} role={session.role} onPurchase={purchase} onAdminAction={adminAction} busy={busy} busyId={busyId} onLogout={logout} /> : <AuthScreen mode={mode} setMode={setMode} onSubmit={authenticate} busy={busy} />}
     {notice && <div role="alert" className="toast">{notice}</div>}
   </>
 }

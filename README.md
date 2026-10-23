@@ -1,6 +1,6 @@
 # Motorhouse — Express + MongoDB Atlas
 
-This Incubyte car dealership kata includes an Express/MongoDB Atlas REST API and a React/Tailwind single-page application. The current frontend stage supports registration, login, browsing, filters, and purchase. Admin inventory forms are the next stage.
+This Incubyte car dealership kata includes an Express/MongoDB Atlas REST API and a React/Tailwind single-page application. The frontend supports registration, login, browsing, filters, purchase, and admin forms to add, edit, delete, and restock vehicles.
 
 ## Current REST API
 
@@ -60,7 +60,9 @@ npm test
 npm run dev
 ```
 
-Open `http://localhost:5173`. The frontend sends requests to `http://localhost:8000` by default. For another API address, set `VITE_API_URL` in the frontend environment before starting Vite. The backend CORS origin defaults to `http://localhost:5173`; adjust `FRONTEND_ORIGIN` in `backend/.env` if you change the frontend origin. Run `npm run build` in `frontend/` to check the production bundle. The invite code is entered in the registration form and is never embedded in the frontend source. If the inventory is empty, add a vehicle using the admin API until the admin UI stage is complete.
+Open `http://localhost:5173`. The frontend sends requests to `http://localhost:8000` by default. For another API address, set `VITE_API_URL` in the frontend environment before starting Vite. The backend CORS origin defaults to `http://localhost:5173`; adjust `FRONTEND_ORIGIN` in `backend/.env` if you change the frontend origin. Run `npm run build` in `frontend/` to check the production bundle. The invite code is entered in the registration form and is never embedded in the frontend source. Register with the code from your private `backend/.env`, sign in, and use **Add vehicle** to populate an empty collection. Admin accounts see edit, restock, and delete actions on each vehicle; members do not.
+
+`npm ci` may report dependency advisories. Use `npm audit` to inspect them before changing versions; the current frontend audit reports eight advisories, primarily affecting its build/test tools. Avoid `npm audit fix --force` without testing the required major upgrades and your Node.js version.
 
 Register your admin account by including the code from your private `.env` file:
 
