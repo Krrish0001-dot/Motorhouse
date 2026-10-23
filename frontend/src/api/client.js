@@ -20,4 +20,8 @@ export const api = {
   login: data => request('/api/auth/login', { method: 'POST', body: JSON.stringify(data) }),
   vehicles: token => request('/api/vehicles', { token }),
   purchase: (id, token) => request(`/api/vehicles/${encodeURIComponent(id)}/purchase`, { method: 'POST', token }),
+  createVehicle: (data, token) => request('/api/vehicles', { method: 'POST', token, body: JSON.stringify(data) }),
+  updateVehicle: (id, data, token) => request(`/api/vehicles/${encodeURIComponent(id)}`, { method: 'PUT', token, body: JSON.stringify(data) }),
+  deleteVehicle: (id, token) => request(`/api/vehicles/${encodeURIComponent(id)}`, { method: 'DELETE', token }),
+  restockVehicle: (id, quantity, token) => request(`/api/vehicles/${encodeURIComponent(id)}/restock`, { method: 'POST', token, body: JSON.stringify({ quantity }) }),
 }

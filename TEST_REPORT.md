@@ -24,10 +24,10 @@ Run from `frontend/`:
 ```text
 $ npm test
 Test Files  1 passed (1)
-Tests       2 passed (2)
+Tests       4 passed (4)
 
 $ npm run build
 vite build completed successfully
 ```
 
-The frontend tests exercise registration with an optional admin invite code, automatic login, authenticated inventory loading, text filtering, purchase, and disabling purchase when stock reaches zero. These use a mocked HTTP boundary; the browser UI and Atlas-backed end-to-end flow still need a local manual check. The frontend test commit preceded the implementation commit and initially failed as expected.
+The frontend tests exercise registration with an optional admin invite code, automatic login, authenticated inventory loading, text filtering, purchase, disabling purchase when stock reaches zero, admin CRUD/restock controls, and hiding admin controls from members. These use a mocked HTTP boundary; the browser UI and Atlas-backed end-to-end flow still need a local manual check. Each frontend test commit preceded the related implementation and initially failed as expected. The frontend dependency audit currently reports eight advisories (five moderate, one high, two critical); the dependency upgrades have not yet been made or validated.

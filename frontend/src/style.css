@@ -9,3 +9,4 @@ button, input { outline-offset: 2px; }
 .button-primary { @apply inline-flex items-center gap-2 bg-forest text-white font-bold rounded-xl px-5 py-3.5 hover:bg-[#245641] transition; }
 .button-outline { @apply inline-flex items-center gap-2 border border-[#dce3d9] bg-white text-forest font-bold rounded-xl px-5 py-3.5 hover:border-forest transition; }
 .toast { @apply fixed z-30 bottom-5 right-5 max-w-sm rounded-xl bg-ink px-5 py-4 text-white shadow-xl text-sm; }
+.admin-action { @apply flex-1 rounded-lg border border-[#e4ebe0] px-2 py-2.5 hover:bg-sage transition; }
