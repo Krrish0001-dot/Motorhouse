@@ -2,12 +2,13 @@ import express from 'express'
 import cors from 'cors'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
+import { createHash, timingSafeEqual } from 'node:crypto'
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const publicUser = user => ({ id: String(user.id), email: user.email, role: user.role })
 const asyncRoute = handler => (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next)
 
-export function createApp({ users, jwtSecret, frontendOrigin = 'http://localhost:5173' }) {
+export function createApp({ users, jwtSecret, adminInviteCode = '', frontendOrigin = 'http://localhost:5173' }) {
   if (!users || !jwtSecret || Buffer.byteLength(jwtSecret) < 32) {
     throw new Error('A user store and JWT secret of at least 32 bytes are required')
   }
@@ -23,12 +24,21 @@ export function createApp({ users, jwtSecret, frontendOrigin = 'http://localhost
     if (!emailPattern.test(email) || email.length > 320 || typeof password !== 'string' || password.length < 8 || Buffer.byteLength(password) > 72) {
       return res.status(422).json({ error: 'Enter a valid email and a password of 8–72 bytes' })
     }
+    const requestedCode = req.body?.admin_code
+    let role = 'user'
+    if (requestedCode !== undefined && requestedCode !== '') {
+      if (typeof requestedCode !== 'string' || !adminInviteCode) return res.status(403).json({ error: 'Invalid admin invite code' })
+      const suppliedHash = createHash('sha256').update(requestedCode).digest()
+      const expectedHash = createHash('sha256').update(adminInviteCode).digest()
+      if (!timingSafeEqual(suppliedHash, expectedHash)) return res.status(403).json({ error: 'Invalid admin invite code' })
+      role = 'admin'
+    }
     if (await users.findByEmail(email)) return res.status(409).json({ error: 'Email already registered' })
 
     const passwordHash = await bcrypt.hash(password, 12)
     try {
-      // Roles are assigned by the server. A client-supplied role is ignored.
-      const user = await users.create({ email, passwordHash, role: 'user' })
+      // Roles come from the server-side invite check, never a client-supplied role.
+      const user = await users.create({ email, passwordHash, role })
       return res.status(201).json(publicUser(user))
     } catch (error) {
       if (error.code === 11000) return res.status(409).json({ error: 'Email already registered' })
