@@ -17,6 +17,7 @@ export function createApp({ users, vehicles, jwtSecret, adminInviteCode = '', fr
   app.disable('x-powered-by')
   app.use(cors({ origin: frontendOrigin }))
   app.use(express.json({ limit: '16kb' }))
+  app.get('/api/health', (_req, res) => res.json({ status: 'ok' }))
 
   const authenticate = createAuthenticate({ users, jwtSecret })
   const auth = createAuthController({ users, jwtSecret, adminInviteCode })
