@@ -39,6 +39,20 @@ function fixture() {
       return saved
     },
     async delete(id) { return inventory.delete(id) },
+    async purchase(id) {
+      const item = inventory.get(id)
+      if (!item || item.quantity < 1) return null
+      const saved = { ...item, quantity: item.quantity - 1 }
+      inventory.set(id, saved)
+      return saved
+    },
+    async restock(id, amount) {
+      const item = inventory.get(id)
+      if (!item) return null
+      const saved = { ...item, quantity: item.quantity + amount }
+      inventory.set(id, saved)
+      return saved
+    },
   }
   return { app: createApp({ users, vehicles, jwtSecret: 'test-secret-with-at-least-32-characters', adminInviteCode: 'test-admin-code' }) }
 }
@@ -103,4 +117,34 @@ test('admins update and delete; members cannot; missing IDs return 404', async (
   assert.equal((await request(app).delete('/api/vehicles/missing').set(admin)).status, 404)
   assert.equal((await request(app).delete(`/api/vehicles/${id}`).set(admin)).status, 204)
   assert.deepEqual((await request(app).get('/api/vehicles').set(member)).body, [])
+})
+
+test('members purchase one at a time; stock cannot fall below zero', async () => {
+  const { app } = fixture()
+  const admin = await access(app, 'admin@example.com', true)
+  const member = await access(app, 'member@example.com')
+  const id = (await request(app).post('/api/vehicles').set(admin).send({ ...sample, quantity: 1 })).body.id
+  assert.equal((await request(app).post(`/api/vehicles/${id}/purchase`)).status, 401)
+  const bought = await request(app).post(`/api/vehicles/${id}/purchase`).set(member)
+  assert.equal(bought.status, 200)
+  assert.equal(bought.body.quantity, 0)
+  assert.equal((await request(app).post(`/api/vehicles/${id}/purchase`).set(member)).status, 409)
+  assert.equal((await request(app).post('/api/vehicles/missing/purchase').set(member)).status, 404)
+  assert.equal((await request(app).get('/api/vehicles').set(member)).body[0].quantity, 0)
+})
+
+test('only admins can restock by a positive whole quantity', async () => {
+  const { app } = fixture()
+  const admin = await access(app, 'admin@example.com', true)
+  const member = await access(app, 'member@example.com')
+  const id = (await request(app).post('/api/vehicles').set(admin).send({ ...sample, quantity: 0 })).body.id
+  assert.equal((await request(app).post(`/api/vehicles/${id}/restock`).set(member).send({ quantity: 2 })).status, 403)
+  for (const quantity of [0, -1, 1.5, '2', null]) {
+    assert.equal((await request(app).post(`/api/vehicles/${id}/restock`).set(admin).send({ quantity })).status, 422)
+  }
+  assert.equal((await request(app).post('/api/vehicles/missing/restock').set(admin).send({ quantity: 2 })).status, 404)
+  const restocked = await request(app).post(`/api/vehicles/${id}/restock`).set(admin).send({ quantity: 3 })
+  assert.equal(restocked.status, 200)
+  assert.equal(restocked.body.quantity, 3)
+  assert.equal((await request(app).post(`/api/vehicles/${id}/purchase`).set(member)).body.quantity, 2)
 })
