@@ -3,12 +3,13 @@ import cors from 'cors'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { createHash, timingSafeEqual } from 'node:crypto'
+import { vehicleRoutes } from './vehicle-routes.js'
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const publicUser = user => ({ id: String(user.id), email: user.email, role: user.role })
 const asyncRoute = handler => (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next)
 
-export function createApp({ users, jwtSecret, adminInviteCode = '', frontendOrigin = 'http://localhost:5173' }) {
+export function createApp({ users, vehicles, jwtSecret, adminInviteCode = '', frontendOrigin = 'http://localhost:5173' }) {
   if (!users || !jwtSecret || Buffer.byteLength(jwtSecret) < 32) {
     throw new Error('A user store and JWT secret of at least 32 bytes are required')
   }
@@ -57,7 +58,7 @@ export function createApp({ users, jwtSecret, adminInviteCode = '', frontendOrig
     return res.json({ access_token, token_type: 'bearer', role: user.role })
   }))
 
-  app.get('/api/auth/me', asyncRoute(async (req, res) => {
+  const authenticate = asyncRoute(async (req, res, next) => {
     const match = /^Bearer (.+)$/i.exec(req.get('Authorization') || '')
     if (!match) return res.status(401).json({ error: 'Authentication required' })
     let payload
@@ -65,8 +66,12 @@ export function createApp({ users, jwtSecret, adminInviteCode = '', frontendOrig
     catch { return res.status(401).json({ error: 'Invalid token' }) }
     const user = await users.findById(payload.sub)
     if (!user) return res.status(401).json({ error: 'Invalid token' })
-    return res.json(publicUser(user))
-  }))
+    req.user = user
+    next()
+  })
+
+  app.get('/api/auth/me', authenticate, (req, res) => res.json(publicUser(req.user)))
+  if (vehicles) app.use('/api/vehicles', authenticate, vehicleRoutes({ vehicles }))
 
   app.use((error, _req, res, _next) => {
     if (error instanceof SyntaxError && 'body' in error) return res.status(400).json({ error: 'Malformed JSON' })
