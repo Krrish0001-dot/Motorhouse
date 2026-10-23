@@ -24,6 +24,13 @@ function fixture({ adminInviteCode = 'test-admin-invite-code' } = {}) {
   return { app: createApp({ users, jwtSecret: 'test-secret-with-at-least-32-characters', adminInviteCode }), records }
 }
 
+test('exposes an unauthenticated health check for deployment', async () => {
+  const { app } = fixture()
+  const response = await request(app).get('/api/health')
+  assert.equal(response.status, 200)
+  assert.deepEqual(response.body, { status: 'ok' })
+})
+
 test('registers a member with a hashed password and normalized email', async () => {
   const { app, records } = fixture()
   const response = await request(app).post('/api/auth/register').send({ email: '  Buyer@Example.com ', password: 'longpassword', role: 'admin' })
