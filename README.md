@@ -4,6 +4,8 @@ Motorhouse is a full-stack inventory kata with an Express/MongoDB Atlas REST API
 
 **Stack:** Node.js, Express, MongoDB Atlas, JWT, React, Vite, Tailwind CSS, Vitest, and Node's test runner. The repository has separate `backend/` and `frontend/` packages.
 
+**Live application:** [Motorhouse on Vercel](https://frontend-delta-woad-48.vercel.app) · **API:** [Motorhouse on Render](https://motorhouse.onrender.com) · **Health check:** [GET /api/health](https://motorhouse.onrender.com/api/health) · **Source:** [GitHub](https://github.com/Krrish0001-dot/Motorhouse)
+
 ## Current REST API
 
 | Method | Path | Result |
@@ -18,7 +20,7 @@ Motorhouse is a full-stack inventory kata with an Express/MongoDB Atlas REST API
 | `DELETE` | `/api/vehicles/:id` | Deletes a vehicle (admin only) |
 | `POST` | `/api/vehicles/:id/purchase` | Decreases stock by one; returns `409` when out of stock (authenticated) |
 | `POST` | `/api/vehicles/:id/restock` | Adds a positive whole `quantity` to stock (admin only) |
-| `GET` | `/api/health` | Public health response for Railway (`{"status":"ok"}`) |
+| `GET` | `/api/health` | Public health response (`{"status":"ok"}`) |
 
 Passwords use bcrypt hashes. The database has a unique email index. The server assigns the admin role only when `admin_code` matches the private `ADMIN_INVITE_CODE`; a client-supplied `role` is ignored. MongoDB Atlas is the persistent database; tests inject fake stores to verify HTTP behavior without Atlas credentials. The local browser check confirmed registration, vehicle creation, price update, and purchase with the user's Atlas cluster.
 
@@ -75,14 +77,14 @@ Register your admin account by including the code from your private `.env` file:
 
 You can enter these details in the React registration form or send that JSON to `POST /api/auth/register`.
 
-## Deploy: Railway API and Vercel frontend
+## Deploy: Render API and Vercel frontend
 
-1. Push this repository to GitHub **without** `backend/.env` or any secrets. Create a Railway service from the GitHub repository and set its **Root Directory** to `backend`. Use `npm start` as the start command and `/api/health` as the healthcheck path. Railway assigns the runtime `PORT`; do not hardcode it.
-2. Set Railway service variables `MONGODB_URI`, `MONGODB_DB_NAME` (for example `motorhouse`), `JWT_SECRET` (at least 32 bytes), and `ADMIN_INVITE_CODE`. Configure Atlas Network Access so Railway's outbound connection can reach the database. Generate a public Railway domain and verify `https://YOUR-API-DOMAIN/api/health` returns `{"status":"ok"}`.
-3. Create a Vercel project from the same GitHub repository. Set its **Root Directory** to `frontend`, framework to **Vite**, build command to `npm run build`, and output directory to `dist`. Set the build environment variable `VITE_API_URL` to your Railway HTTPS domain **without a trailing slash**. Deploy and note the production Vercel URL.
-4. Back in Railway, set `FRONTEND_ORIGIN` to that exact Vercel origin (for example `https://motorhouse.example.vercel.app`, **no trailing slash**) and redeploy the API. Open the Vercel site and verify login, inventory loading, and an admin action. Vercel preview URLs have different origins; this configuration allows the chosen production origin.
+1. Push this repository to GitHub **without** `backend/.env` or any secrets. In Render, create a **Web Service** from the `main` branch, set **Root Directory** to `backend`, **Build Command** to `npm ci`, **Start Command** to `npm start`, and **Health Check Path** to `/api/health`. Select the Free instance if appropriate. The server listens on Render's `PORT` automatically.
+2. Set Render environment variables `MONGODB_URI`, `MONGODB_DB_NAME` (for example `motorhouse`), `JWT_SECRET` (at least 32 bytes), and `ADMIN_INVITE_CODE`. Configure Atlas Network Access so Render can connect to the cluster. After deployment, verify that [the API health endpoint](https://motorhouse.onrender.com/api/health) returns `{"status":"ok"}`. Replace the example domain if deploying your own copy.
+3. In Vercel, import the same GitHub repository and set **Root Directory** to `frontend`, **Framework Preset** to Vite, **Build Command** to `npm run build`, and **Output Directory** to `dist`. Set the Production **Config** variable `VITE_API_URL` to your Render HTTPS origin (for this deployment, `https://motorhouse.onrender.com`) with no trailing slash. Deploy or redeploy after adding the variable.
+4. In Render, set `FRONTEND_ORIGIN` to your Vercel production origin (for this deployment, `https://frontend-delta-woad-48.vercel.app`) with no trailing slash, and redeploy. Open that production URL to sign in and load inventory.
 
-The frontend reads `VITE_API_URL` at **build time**, so changing it requires a new Vercel deployment. `FRONTEND_ORIGIN` is a runtime Railway variable. The admin invite code and JWT secret belong **only** in Railway, never in Vercel's `VITE_` variables. See [Railway's monorepo guide](https://docs.railway.com/deployments/monorepo) and [Vercel's build configuration](https://vercel.com/docs/builds/configure-a-build) for the current platform controls.
+The frontend reads `VITE_API_URL` at **build time**, so changing it requires a new Vercel deployment. `FRONTEND_ORIGIN` is a runtime Render variable; the API allows this one configured origin. Vercel also assigns each deployment a different URL, which will not match the production origin unless you change the Render setting. On Render's Free instance, the API may spin down after inactivity, making the first request slower. Keep the admin invite code and JWT secret **only** in Render, never in Vercel's public `VITE_` variables. See [Render's web service guide](https://render.com/docs/web-services), [Render's free instance details](https://render.com/docs/free), and [Vercel's build configuration](https://vercel.com/docs/builds/configure-a-build).
 
 ## Screenshots
 
@@ -100,6 +102,6 @@ The Git history contains failing tests before the authentication, vehicle CRUD, 
 
 ## My AI Usage
 
-I used OpenAI Codex to draft backend authentication and inventory tests, implement and refactor the Express/MongoDB API into MVC layers, write frontend interaction tests and React/Tailwind components, debug UI behavior from screenshots, and prepare this documentation. I reviewed the behavior by running both test suites and the frontend production build. I also manually checked the local Atlas-backed flows with the assistant's guidance: admin registration, create, edit, and purchase; the member view works locally.
+I used OpenAI Codex to draft backend authentication and inventory tests, implement and refactor the Express/MongoDB API into MVC layers, write frontend interaction tests and React/Tailwind components, debug UI behavior from screenshots, and prepare this documentation. I reviewed the behavior by running both test suites and the frontend production build. I also manually checked the local Atlas-backed flows with the assistant's guidance: admin registration, create, edit, and purchase; the member view works locally. After deploying, I checked the Render health endpoint and signed in through the Vercel production domain.
 
-AI sped up the red–green cycles and helped catch gaps such as atomic stock decrement and purchase confirmation. It also generated initial code that needed human feedback: the search icon overlapped its input until it was seen in the browser. The tests use injected stores and mocked HTTP, so platform deployment and final browser checks remain necessary. The raw, unedited chat log or a public chat link belongs in `PROMPTS.md` before submission. **The kata requires AI co-author trailers on AI-assisted commits; audit and correct commit metadata before publication.**
+AI sped up the red–green cycles and helped catch gaps such as atomic stock decrement and purchase confirmation. It also generated initial code that needed human feedback: the search icon overlapped its input until it was seen in the browser. The tests use injected stores and mocked HTTP, so I also checked the deployed API and browser sign-in. The remaining raw conversation needs to be appended to `PROMPTS.md` before submission. **The kata requires AI co-author trailers on AI-assisted commits; the existing commit metadata still needs review before final submission.**
